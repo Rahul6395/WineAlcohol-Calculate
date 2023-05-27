@@ -2,82 +2,99 @@ import React from 'react';
 import data from "../json/data.json"
 
 const GammaTable = () => {
+  const gammaByClass = {};
+  data.forEach((point) => {
+    const { Alcohol, Ash, Hue, Magnesium } = point;
+    const gamma = (Ash * Hue) / Magnesium;
 
-  // Function to calculate class-wise mean, median, and mode of Gamma
-  const calculateGammaStats = () => {
-    // Calculate Gamma for each point and group by class
-    const gammaByClass = {};
-    data.forEach((point) => {
-      const { Alcohol, Ash, Hue, Magnesium } = point;
-      const gamma = (Ash * Hue) / Magnesium;
+    if (gammaByClass[Alcohol]) {
+      gammaByClass[Alcohol].push(gamma);
+    } else {
+      gammaByClass[Alcohol] = [gamma];
+    }
+  });
 
-      if (gammaByClass[Alcohol]) {
-        gammaByClass[Alcohol].push(gamma);
+  function calculateMean(data) {
+      const sum = data.reduce((acc, item) => acc + item, 0) / data.length;
+      return sum;
+    }
+    
+  //   Median
+    function calculateMedian(data,) {
+      const sortedData = data.sort((a, b) => a - b);
+      const midIndex = Math.floor(sortedData.length / 2);
+      if (sortedData.length % 2 === 0) {
+        return (sortedData[midIndex - 1] + sortedData[midIndex]) / 2;
       } else {
-        gammaByClass[Alcohol] = [gamma];
+        return sortedData[midIndex];
       }
-    });
-console.log("gammaByClass",gammaByClass)
-    // Calculate mean, median, and mode for each class
-    const statsByClass = Object.entries(gammaByClass).map(([className, gammaValues]) => {
-      // Mean
-      const mean = gammaValues.reduce((sum, value) => sum + value, 0) / gammaValues.length;
-      // Median
-      const median = gammaValues.sort((a, b) => a - b)[Math.floor(gammaValues.length / 2)];
-      // Mode
-      const mode = gammaValues.sort((a, b) =>
-        gammaValues.filter((v) => v === a).length - gammaValues.filter((v) => v === b).length
-      )[0];
+    }
+  
+  //   Mode
+    function calculateMode(data,) { 
+      const counts = {};
+    data.forEach(item => {
+        counts[item] = counts[item]  + 1 || 1;
+      });
 
-      return {
-        className,
-        mean: mean.toFixed(3),
-        median: median.toFixed(3),
-        mode: mode.toFixed(3),
-      };
-    });
+      let maxCount = 0;
+      let mode = -Infinity;
+      for (const value in counts) {
+        const item = counts[value];
+        if (item >= maxCount && Number(value) > mode) {
+          maxCount = item;
+          mode = Number(value);
+        }
+      }
+     
+      return mode.toFixed(3);
+    }
+   
 
-    return statsByClass;
-  };
-
-  const gammaStats = calculateGammaStats();
-
-  return (
-    <div>
-    <h2 className='heading'>Gamma</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Measure</th>
-          {gammaStats.map((stat) => (
-            <th key={stat.className}>Class {stat.className}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Gamma Mean</td>
-          {gammaStats.map((stat) => (
-            <td key={stat.className}>{stat.mean}</td>
-          ))}
-        </tr>
-        <tr>
-          <td>Gamma Median</td>
-          {gammaStats.map((stat) => (
-            <td key={stat.className}>{stat.median}</td>
-          ))}
-        </tr>
-        <tr>
-          <td>Gamma Mode</td>
-          {gammaStats.map((stat) => (
-            <td key={stat.className}>{stat.mode}</td>
-          ))}
-        </tr>
-      </tbody>
-    </table>
-    </div>
-  );
+return (
+  <div>
+  <h2 className='heading'>Gamma</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Measure</th>
+        {Object.entries(gammaByClass).map((className, gammaValues) => (
+          <th>Class {gammaValues+1}</th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Gamma Mean</td>
+     
+      {
+        Object.entries(gammaByClass).map(([className, gammaValues])=>(
+          <td>{calculateMean(gammaValues).toFixed(3)}</td>
+        ))
+      }
+      </tr>
+      <tr>
+        <td>Gamma Median</td>
+        {
+        Object.entries(gammaByClass).map(([className, gammaValues])=>(
+          <td>{calculateMedian(gammaValues).toFixed(3)}</td>
+        ))
+      }
+      </tr>
+      <tr>
+        <td>Gamma Mode</td>
+        {
+        Object.entries(gammaByClass).map(([className, gammaValues])=>(
+          <td>{calculateMode(gammaValues)}</td>
+        ))
+      }
+      </tr>
+    </tbody>
+  </table>
+  </div>
+);
 }
+
 
 
 export default GammaTable;

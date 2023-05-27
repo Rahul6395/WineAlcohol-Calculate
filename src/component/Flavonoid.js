@@ -14,15 +14,15 @@ useEffect(()=>{
 },[])
 //Get All Alcohol
 const alcohol = new Set(value);
-console.log("Alcohol",[...alcohol])
-
   const classNames = [...alcohol]; // Replace with your actual class names
+
+
 
   //Mean
   function calculateMean(data, className) {
     const filteredData = data.filter(item => item.Alcohol === className);
     const sum = filteredData.reduce((acc, item) => acc + item.Flavanoids, 0);
-    return parseInt(sum) / filteredData.length;
+    return parseFloat(sum) / filteredData.length;
   }
   
 //   Median
